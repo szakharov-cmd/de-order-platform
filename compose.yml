@@ -1,0 +1,36 @@
+services:
+  postgres-source:
+    image: postgres:17
+
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+
+    ports:
+      - "127.0.0.1:5432:5432"
+
+    volumes:
+      - postgres_source_data:/var/lib/postgresql/data
+      - ./infra/postgres/init:/docker-entrypoint-initdb.d:ro
+    
+    command: 
+      - postgres
+      - -c 
+      - wal_level=logical 
+      - -c 
+      - max_replication_slots=4
+      - -c 
+      - max_wal_senders=4
+
+    healthcheck:
+      test: 
+        - CMD-SHELL 
+        - 'pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}'
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+volumes:
+  postgres_source_data:
