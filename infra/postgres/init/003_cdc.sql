@@ -21,7 +21,7 @@ on table
     public.refunds
 to debezium;
 
-create publication 
+create publication shop_publication
 for table
     public.customers,
     public.products,
