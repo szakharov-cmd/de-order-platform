@@ -27,7 +27,7 @@ streaming_df = streaming_df.withColumns({
 })
 streaming_df = streaming_df.withColumnRenamed('timestamp', 'kafka_timestamp')
 streaming_df = streaming_df.withColumn('ingested_at', F.current_timestamp())
-streaming_df = streaming_df.withColumn('ingested_date', F.current_date())
+streaming_df = streaming_df.withColumn('ingest_date', F.current_date())
 
 
 query = (
