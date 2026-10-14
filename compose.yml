@@ -69,6 +69,7 @@ services:
       retries: 10
       start_period: 30s
 
+
   connect:
     image: quay.io/debezium/connect:3.3.1.Final
 
@@ -94,6 +95,54 @@ services:
       postgres-source:
         condition: service_healthy
 
+
+  spark-archive:
+    build:
+      context: .
+      dockerfile: docker/spark.Dockerfile
+    image: de-orders-spark:dev
+
+    depends_on:
+      kafka:
+        condition: service_healthy
+
+    volumes:
+       - spark_archive_checkpoint:/checkpoints
+
+    command:
+      - /opt/spark/bin/spark-submit
+      - --master 
+      - local[2]
+      - --packages 
+      - org.apache.spark:spark-sql-kafka-0-10_2.12:3.5.6
+      - --conf 
+      - spark.jars.ivy=/tmp/ivy
+      - /app/src/orders_platform/streaming/archive.py
+
+
+  object-store: 
+    image: rustfs/rustfs:1.0.1
+
+    environment:
+      RUSTFS_ACCESS_KEY: ${RUSTFS_ACCESS_KEY}
+      RUSTFS_SECRET_KEY: ${RUSTFS_SECRET_KEY}
+      RUSTFS_ADDRESS: ":9000"
+      RUSTFS_CONSOLE_ADDRESS: ":9001"
+      RUSTFS_CONSOLE_ENABLE: "true"
+
+    ports:
+      - "127.0.0.1:9000:9000"
+      - "127.0.0.1:9001:9001"
+
+    volumes:
+      - rustfs_data:/data
+
+    command: 
+      - /data 
+
+
 volumes:
   postgres_source_data:
   kafka_data:
+  spark_archive_checkpoint:
+  rustfs_data:
