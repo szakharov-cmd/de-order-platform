@@ -102,6 +102,10 @@ services:
       dockerfile: docker/spark.Dockerfile
     image: de-orders-spark:dev
 
+    environment:
+      AWS_ACCESS_KEY_ID: ${RUSTFS_ACCESS_KEY}
+      AWS_SECRET_ACCESS_KEY: ${RUSTFS_SECRET_KEY}
+
     depends_on:
       kafka:
         condition: service_healthy
@@ -114,9 +118,17 @@ services:
       - --master 
       - local[2]
       - --packages 
-      - org.apache.spark:spark-sql-kafka-0-10_2.12:3.5.6
+      - org.apache.spark:spark-sql-kafka-0-10_2.12:3.5.6,org.apache.hadoop:hadoop-aws:3.3.4
       - --conf 
       - spark.jars.ivy=/tmp/ivy
+      - --conf
+      - spark.hadoop.fs.s3a.endpoint=http://object-store:9000
+      - --conf
+      - spark.hadoop.fs.s3a.path.style.access=true 
+      - --conf
+      - spark.hadoop.fs.s3a.connection.ssl.enabled=false
+      - --conf
+      - spark.hadoop.fs.s3a.aws.credentials.provider=com.amazonaws.auth.EnvironmentVariableCredentialsProvider
       - /app/src/orders_platform/streaming/archive.py
 
 
