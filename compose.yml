@@ -150,7 +150,30 @@ services:
       - rustfs_data:/data
 
     command: 
-      - /data 
+      - /data
+
+
+  clickhouse:
+    image: clickhouse/clickhouse-server:25.8.33.6
+
+    environment:
+      CLICKHOUSE_DB: 'silver_state'
+      CLICKHOUSE_USER: ${WAREHOUSE_USER}
+      CLICKHOUSE_PASSWORD: ${WAREHOUSE_PASS}
+      CLICKHOUSE_DEFAULT_ACCESS_MANAGEMENT: "1"
+
+    ports:
+      - "127.0.0.1:8123:8123"
+      - "127.0.0.1:19000:9000"
+
+    volumes:
+      - clickhouse_data:/var/lib/clickhouse
+      - clickhouse_logs:/var/log/clickhouse-server
+
+    ulimits:
+      nofile:
+        soft: 262144
+        hard: 262144
 
 
 volumes:
@@ -158,3 +181,5 @@ volumes:
   kafka_data:
   spark_archive_checkpoint:
   rustfs_data:
+  clickhouse_data:
+  clickhouse_logs:
