@@ -8,7 +8,6 @@ spark = (
     .config("spark.sql.session.timeZone", "UTC")
     .getOrCreate()
 )
-
 spark.sparkContext.setLogLevel('WARN')
 
 streaming_df = (
