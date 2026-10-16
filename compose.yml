@@ -103,8 +103,14 @@ services:
     image: de-orders-spark:dev
 
     environment:
+      TZ: "UTC"
       AWS_ACCESS_KEY_ID: ${RUSTFS_ACCESS_KEY}
       AWS_SECRET_ACCESS_KEY: ${RUSTFS_SECRET_KEY}
+      CLICKHOUSE_HOST: "clickhouse"
+      CLICKHOUSE_PORT: "8123"
+      CLICKHOUSE_USER: ${WAREHOUSE_USER}
+      CLICKHOUSE_PASSWORD: ${WAREHOUSE_PASS}
+      CLICKHOUSE_DATABASE: "silver_state"
 
     depends_on:
       kafka:
@@ -129,7 +135,7 @@ services:
       - spark.hadoop.fs.s3a.connection.ssl.enabled=false
       - --conf
       - spark.hadoop.fs.s3a.aws.credentials.provider=com.amazonaws.auth.EnvironmentVariableCredentialsProvider
-      - /app/src/orders_platform/streaming/archive.py
+      - /app/src/orders_platform/jobs/streaming/archive.py
 
 
   object-store: 

@@ -5,4 +5,6 @@ ENV PYTHONPATH=/app/src
 
 USER root
 RUN mkdir -p /checkpoints && chown 185:0 /checkpoints
+COPY requirements-spark.txt /app/requirements-spark.txt
+RUN python3 -m pip install --no-cache-dir -r /app/requirements-spark.txt
 USER 185
