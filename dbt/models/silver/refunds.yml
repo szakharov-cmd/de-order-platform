@@ -1,0 +1,55 @@
+version: 2
+
+models:
+  - name: refunds
+    description: "Actual refunds data"
+    columns:
+      - name: refund_id
+        description: "Refund ID"
+        data_tests:
+          - unique
+          - not_null
+      - name: payment_id
+        description: "Payments ID"
+        data_tests:
+          - not_null
+      - name: amount
+        description: "Refund amount"
+        data_tests:
+          - not_null
+      - name: status
+        description: "Refund status"
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - pending
+                  - succeeded
+                  - failed
+      - name: created_at
+        description: "Refund created at service"
+        data_tests:
+          - not_null
+      - name: updated_at
+        description: "Refund last updated"
+        data_tests:
+          - not_null
+      - name: succeeded_at
+        description: "Refund succeeded time"
+      - name: source_changed_at
+        description: "Debezium update time"
+        data_tests:
+          - not_null
+      - name: ingested_at
+        description: "S3 ingest time"
+        data_tests:
+          - not_null
+      - name: source_partition
+        description: "Kafka partition"
+        data_tests:
+          - not_null
+      - name: source_offset
+        description: "Kafka offset"
+        data_tests:
+          - not_null
