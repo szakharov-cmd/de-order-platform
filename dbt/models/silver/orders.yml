@@ -1,0 +1,61 @@
+version: 2
+
+models:
+  - name: orders
+    description: "Actual orders data"
+    columns:
+      - name: order_id
+        description: "Order ID"
+        data_tests:
+          - unique
+          - not_null
+      - name: customer_id
+        description: "Customer ID"
+        data_tests:
+          - not_null
+      - name: status
+        description: "Order status"
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - created
+                  - paid
+                  - shipped
+                  - delivered
+                  - cancelled
+      - name: currency
+        description: "Order currency"
+        data_tests:
+          - not_null
+      - name: shipping_amount
+        description: "Order shipping amount"
+        data_tests:
+          - not_null
+      - name: delivery_region
+        description: "Order region"
+      - name: created_at
+        description: "Order created at service"
+        data_tests:
+          - not_null
+      - name: updated_at
+        description: "Order last updated"
+        data_tests:
+          - not_null
+      - name: source_changed_at
+        description: "Debezium update time"
+        data_tests:
+          - not_null
+      - name: ingested_at
+        description: "S3 ingest time"
+        data_tests:
+          - not_null
+      - name: source_partition
+        description: "Kafka partition"
+        data_tests:
+          - not_null
+      - name: source_offset
+        description: "Kafka offset"
+        data_tests:
+          - not_null

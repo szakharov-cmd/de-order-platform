@@ -214,7 +214,7 @@ services:
       - spark.hadoop.fs.s3a.connection.ssl.enabled=false
       - --conf
       - spark.hadoop.fs.s3a.aws.credentials.provider=com.amazonaws.auth.EnvironmentVariableCredentialsProvider
-      - /app/src/orders_platform/jobs/streaming/load_customers_history.py
+      - /app/src/orders_platform/jobs/streaming/load_staging_history.py
 
 
   dbt:

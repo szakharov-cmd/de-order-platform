@@ -14,11 +14,15 @@ from pyspark.sql.types import (
 import os
 import clickhouse_connect
 from orders_platform.transformations.customers import parse_customers_cdc
-from orders_platform.sinks.clickhouse import insert_customers_history
+from orders_platform.sinks.clickhouse import (
+    insert_customers_history,
+    insert_orders_history
+)
+from orders_platform.transformations.orders import parse_orders_cdc
 
 spark = (
     SparkSession.builder
-    .appName('load-customers-history-s3')
+    .appName('load-staging-history-s3')
     .config('spark.sql.session.timeZone', 'UTC')
     .getOrCreate()
 )
@@ -60,9 +64,17 @@ try:
 
         try:
             customers_df = parse_customers_cdc(batch)
+            orders_df = parse_orders_cdc(batch)
+
             inserted_rows = insert_customers_history(ch_client, customers_df)
             print(
-                f"Microbatch {batch_id}: sent {inserted_rows} rows",
+                f"Customers microbatch {batch_id}: sent {inserted_rows} rows",
+                flush=True,
+            )
+
+            inserted_rows = insert_orders_history(ch_client, orders_df)
+            print(
+                f"Orders microbatch {batch_id}: sent {inserted_rows} rows",
                 flush=True,
             )
         finally:
@@ -75,7 +87,7 @@ try:
         .outputMode('append')
         .option(
             "checkpointLocation",
-            "/checkpoints/customers-history-s3-v1",
+            "/checkpoints/staging-history-s3-v1",
         )
         .trigger(processingTime='10 seconds')
         .start()

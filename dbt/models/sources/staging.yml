@@ -5,3 +5,5 @@ sources:
     tables:
       - name: customers_cdc
         description: "Customers history data"
+      - name: orders_cdc
+        description: "Orders history data"
