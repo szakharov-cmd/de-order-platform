@@ -2,7 +2,7 @@ create table if not exists staging.orders_cdc (
     order_id Int64,
     customer_id Nullable(Int64),
     status LowCardinality(Nullable(String)),
-    currency LowCardinality (Nullable(String)),
+    currency LowCardinality(Nullable(String)),
     shipping_amount Nullable(Decimal(18,2)),
     delivery_region Nullable(String),
     created_at Nullable(DateTime64(6, 'UTC')),

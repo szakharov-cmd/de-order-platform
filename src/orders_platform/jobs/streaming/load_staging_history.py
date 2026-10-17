@@ -14,11 +14,16 @@ from pyspark.sql.types import (
 import os
 import clickhouse_connect
 from orders_platform.transformations.customers import parse_customers_cdc
+from orders_platform.transformations.orders import parse_orders_cdc
+from orders_platform.transformations.order_items import parse_order_items_cdc
+from orders_platform.transformations.payments import parse_payments_cdc
 from orders_platform.sinks.clickhouse import (
     insert_customers_history,
-    insert_orders_history
+    insert_orders_history,
+    insert_order_items_history,
+    insert_payments_history
 )
-from orders_platform.transformations.orders import parse_orders_cdc
+
 
 spark = (
     SparkSession.builder
@@ -65,16 +70,27 @@ try:
         try:
             customers_df = parse_customers_cdc(batch)
             orders_df = parse_orders_cdc(batch)
+            order_items_df = parse_order_items_cdc(batch)
+            payments_df = parse_payments_cdc(batch)
 
             inserted_rows = insert_customers_history(ch_client, customers_df)
             print(
                 f"Customers microbatch {batch_id}: sent {inserted_rows} rows",
                 flush=True,
             )
-
             inserted_rows = insert_orders_history(ch_client, orders_df)
             print(
                 f"Orders microbatch {batch_id}: sent {inserted_rows} rows",
+                flush=True,
+            )
+            inserted_rows = insert_order_items_history(ch_client, order_items_df)
+            print(
+                f"Order items microbatch {batch_id}: sent {inserted_rows} rows",
+                flush=True,
+            )
+            inserted_rows = insert_payments_history(ch_client, payments_df)
+            print(
+                f"Payments microbatch {batch_id}: sent {inserted_rows} rows",
                 flush=True,
             )
         finally:

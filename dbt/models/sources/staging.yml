@@ -7,3 +7,7 @@ sources:
         description: "Customers history data"
       - name: orders_cdc
         description: "Orders history data"
+      - name: order_items_cdc
+        description: "Order items history data"
+      - name: payments_cdc
+        description: "Payments history data"

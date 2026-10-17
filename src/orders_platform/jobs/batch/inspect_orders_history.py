@@ -6,7 +6,7 @@ from orders_platform.transformations.orders import parse_orders_cdc
 
 spark = (
     SparkSession.builder
-    .appName('load-customers')
+    .appName('load-orders')
     .config('spark.sql.session.timeZone', 'UTC')
     .getOrCreate()
 )

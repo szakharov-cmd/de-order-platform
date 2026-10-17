@@ -1,0 +1,70 @@
+version: 2
+
+models:
+  - name: payments
+    description: "Actual payments data"
+    columns:
+      - name: payment_id
+        description: "Payments ID"
+        data_tests:
+          - unique
+          - not_null
+      - name: order_id
+        description: "Order ID"
+        data_tests:
+            - not_null
+      - name: amount
+        description: "Payment amount"
+        data_tests:
+          - not_null
+      - name: currency
+        description: "Payment currency"
+        data_tests:
+          - not_null
+      - name: status
+        description: "Payment status"
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - pending
+                  - succeeded
+                  - failed
+      - name: payment_method
+        description: "Payment method"
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - card
+                  - bank_transfer
+      - name: created_at
+        description: "Order created at service"
+        data_tests:
+          - not_null
+      - name: updated_at
+        description: "Order last updated"
+        data_tests:
+          - not_null
+      - name: succeeded_at
+        description: "Payment succeeded time"
+        data_tests:
+          - not_null
+      - name: source_changed_at
+        description: "Debezium update time"
+        data_tests:
+          - not_null
+      - name: ingested_at
+        description: "S3 ingest time"
+        data_tests:
+          - not_null
+      - name: source_partition
+        description: "Kafka partition"
+        data_tests:
+          - not_null
+      - name: source_offset
+        description: "Kafka offset"
+        data_tests:
+          - not_null

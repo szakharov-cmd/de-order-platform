@@ -1,0 +1,55 @@
+version: 2
+
+models:
+  - name: order_items
+    description: "Actual order items data"
+    columns:
+      - name: order_item_id
+        description: "Order item ID"
+        data_tests:
+          - unique
+          - not_null
+      - name: order_id
+        description: "Order ID"
+        data_tests:
+          - not_null
+      - name: product_id
+        description: "Product ID"
+        data_tests:
+          - not_null
+      - name: quantity
+        description: "Order item quantity"
+        data_tests:
+          - not_null
+      - name: unit_price
+        description: "Order item price per unit"
+        data_tests:
+          - not_null
+      - name: discount_amount
+        description: "Order item discount"
+        data_tests:
+          - not_null
+      - name: created_at
+        description: "Order created at service"
+        data_tests:
+          - not_null
+      - name: updated_at
+        description: "Order last updated"
+        data_tests:
+          - not_null
+      - name: source_changed_at
+        description: "Debezium update time"
+        data_tests:
+          - not_null
+      - name: ingested_at
+        description: "S3 ingest time"
+        data_tests:
+          - not_null
+      - name: source_partition
+        description: "Kafka partition"
+        data_tests:
+          - not_null
+      - name: source_offset
+        description: "Kafka offset"
+        data_tests:
+          - not_null
