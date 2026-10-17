@@ -182,6 +182,55 @@ services:
         hard: 262144
 
 
+  spark-customers:
+    image: de-orders-spark:dev
+
+    environment:
+      TZ: "UTC"
+      AWS_ACCESS_KEY_ID: ${RUSTFS_ACCESS_KEY}
+      AWS_SECRET_ACCESS_KEY: ${RUSTFS_SECRET_KEY}
+      CLICKHOUSE_HOST: "clickhouse"
+      CLICKHOUSE_PORT: "8123"
+      CLICKHOUSE_USER: ${WAREHOUSE_USER}
+      CLICKHOUSE_PASSWORD: ${WAREHOUSE_PASS}
+      CLICKHOUSE_DATABASE: "silver_state"
+
+    volumes:
+      - spark_customers_checkpoint:/checkpoints
+
+    command:
+      - /opt/spark/bin/spark-submit
+      - --master
+      - local[2]
+      - --packages
+      - org.apache.hadoop:hadoop-aws:3.3.4
+      - --conf
+      - spark.jars.ivy=/tmp/ivy
+      - --conf
+      - spark.hadoop.fs.s3a.endpoint=http://object-store:9000
+      - --conf
+      - spark.hadoop.fs.s3a.path.style.access=true
+      - --conf
+      - spark.hadoop.fs.s3a.connection.ssl.enabled=false
+      - --conf
+      - spark.hadoop.fs.s3a.aws.credentials.provider=com.amazonaws.auth.EnvironmentVariableCredentialsProvider
+      - /app/src/orders_platform/jobs/streaming/load_customers_history.py
+
+
+  dbt:
+    build:
+      context: .
+      dockerfile: docker/dbt.Dockerfile
+    image: de-orders-dbt:dev
+
+    volumes:
+      - ./dbt:/app/dbt
+
+    environment:
+      CLICKHOUSE_USER: ${WAREHOUSE_USER}
+      CLICKHOUSE_PASSWORD: ${WAREHOUSE_PASS}
+
+
 volumes:
   postgres_source_data:
   kafka_data:
@@ -189,3 +238,4 @@ volumes:
   rustfs_data:
   clickhouse_data:
   clickhouse_logs:
+  spark_customers_checkpoint:

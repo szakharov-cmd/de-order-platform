@@ -1,7 +1,5 @@
 from pyspark.sql import (
-    functions as F,
-    DataFrame,
-    Window
+    functions as F
 )
 from pyspark.sql.types import (
     StructType,
@@ -10,8 +8,18 @@ from pyspark.sql.types import (
     StringType
 )
 
-def build_customers_state(cdc_df: DataFrame) -> DataFrame:
+
+def parse_customers_cdc(cdc_df):
     cdc_df = cdc_df.filter(F.col('topic') == 'shop.public.customers')
+    if cdc_df.filter(
+            F.col('partition').isNull() | (F.col('partition') != 0)
+    ).limit(1).count() > 0:
+        raise ValueError('Partition invalid')
+
+    if cdc_df.filter(
+            (F.col('offset') < 0) | F.col('offset').isNull()
+    ).limit(1).count()>0:
+        raise ValueError('Offset invalid')
 
     key_schema = StructType([
         StructField("customer_id", LongType(), True),
@@ -27,7 +35,12 @@ def build_customers_state(cdc_df: DataFrame) -> DataFrame:
         StructField("updated_at", StringType(), True),
     ])
 
+    source_schema = StructType([
+        StructField('ts_ms', LongType(), True)
+    ])
+
     value_schema = StructType([
+        StructField("source", source_schema, True),
         StructField("op", StringType(), True),
         StructField("after", customer_schema, True),
     ])
@@ -87,13 +100,6 @@ def build_customers_state(cdc_df: DataFrame) -> DataFrame:
             'Updated at value in null'
         )
 
-    window = Window.partitionBy('parsed_key.customer_id').orderBy(F.col('offset').desc())
-    cdc_df = cdc_df.withColumn(
-        'rn',
-        F.row_number().over(window)
-    )
-    cdc_df = cdc_df.filter(F.col('rn') == 1)
-
     cdc_df = cdc_df.select(
         F.col('parsed_key.customer_id').alias('customer_id'),
         F.col('parsed_value.after.email').alias('email'),
@@ -101,15 +107,20 @@ def build_customers_state(cdc_df: DataFrame) -> DataFrame:
         F.col('parsed_value.after.segment').alias('segment'),
         F.col('parsed_value.after.created_at').alias('created_at'),
         F.col('parsed_value.after.updated_at').alias('updated_at'),
-        F.col('partition').alias('source_partition'),
-        F.col('offset').alias('source_offset'),
-        F.when(
-            F.col('parsed_value.op') == 'd', F.lit(1))
-        .otherwise(F.lit(0)
-                   ).alias('is_deleted')
+        F.col('parsed_value.op').alias('operation'),
+        F.col('parsed_value.source.ts_ms').alias('source_changed_at'),
+        F.col('topic').alias('topic'),
+        F.col('partition').alias('partition'),
+        F.col('offset').alias('offset'),
+        F.col('ingested_at').alias('ingested_at')
     )
 
     cdc_df = cdc_df.withColumns({
         c: F.to_timestamp(c) for c in ['created_at', 'updated_at']
     })
+    cdc_df = cdc_df.withColumn(
+        'source_changed_at', F.timestamp_millis(F.col('source_changed_at'))
+    )
+    if cdc_df.filter(F.col('source_changed_at').isNull()).limit(1).count() > 0:
+        raise ValueError('Data contains null changed at')
     return cdc_df

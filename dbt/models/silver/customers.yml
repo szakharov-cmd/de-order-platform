@@ -1,0 +1,41 @@
+version: 2
+
+models:
+  - name: customers
+    description: "Actual customers data"
+    columns:
+      - name: customer_id
+        description: "Customer ID"
+        data_tests:
+          - unique
+          - not_null
+      - name: email
+        description: "Customer Email"
+      - name: region
+        description: "Customer region"
+      - name: segment
+        description: "Customer segment"
+      - name: created_at
+        description: "Customer created at service"
+        data_tests:
+          - not_null
+      - name: updated_at
+        description: "Customer last updated"
+        data_tests:
+          - not_null
+      - name: source_changed_at
+        description: "Debezium update time"
+        data_tests:
+          - not_null
+      - name: ingested_at
+        description: "S3 ingest time"
+        data_tests:
+          - not_null
+      - name: source_partition
+        description: "Kafka partition"
+        data_tests:
+          - not_null
+      - name: source_offset
+        description: "Kafka offset"
+        data_tests:
+          - not_null

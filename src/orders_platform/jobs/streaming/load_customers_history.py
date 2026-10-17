@@ -1,0 +1,90 @@
+from pyspark.sql import (
+    SparkSession,
+    functions as F
+)
+from pyspark.sql.types import (
+    StringType,
+    StructField,
+    LongType,
+    StructType,
+    TimestampType,
+    DateType,
+    IntegerType
+)
+import os
+import clickhouse_connect
+from orders_platform.transformations.customers import parse_customers_cdc
+from orders_platform.sinks.clickhouse import insert_customers_history
+
+spark = (
+    SparkSession.builder
+    .appName('load-customers-history-s3')
+    .config('spark.sql.session.timeZone', 'UTC')
+    .getOrCreate()
+)
+
+try:
+    spark.sparkContext.setLogLevel('WARN')
+    stream_schema = StructType([
+        StructField('key', StringType(), True),
+        StructField('value', StringType(), True),
+        StructField('topic', StringType(), True),
+        StructField('partition', IntegerType(), True),
+        StructField('offset', LongType(), True),
+        StructField('kafka_timestamp', TimestampType(), True),
+        StructField('ingested_at', TimestampType(), True),
+        StructField('ingest_date', DateType(), True),
+    ])
+    cdc_stream = (
+        spark.readStream
+        .schema(stream_schema)
+        .option("maxFilesPerTrigger", 10)
+        .parquet('s3a://bronze/cdc/all-tables-v1/')
+    )
+
+    def process_batch(batch, batch_id):
+
+        ch_host = os.environ['CLICKHOUSE_HOST']
+        ch_port = int(os.environ['CLICKHOUSE_PORT'])
+        ch_user = os.environ['CLICKHOUSE_USER']
+        ch_pass = os.environ['CLICKHOUSE_PASSWORD']
+        ch_dbname = os.environ['CLICKHOUSE_DATABASE']
+
+        ch_client = clickhouse_connect.get_client(
+            host=ch_host,
+            port=ch_port,
+            user=ch_user,
+            password=ch_pass,
+            database=ch_dbname
+        )
+
+        try:
+            customers_df = parse_customers_cdc(batch)
+            inserted_rows = insert_customers_history(ch_client, customers_df)
+            print(
+                f"Microbatch {batch_id}: sent {inserted_rows} rows",
+                flush=True,
+            )
+        finally:
+            ch_client.close()
+
+    query = (
+        cdc_stream
+        .writeStream
+        .foreachBatch(process_batch)
+        .outputMode('append')
+        .option(
+            "checkpointLocation",
+            "/checkpoints/customers-history-s3-v1",
+        )
+        .trigger(processingTime='10 seconds')
+        .start()
+    )
+
+    try:
+        query.awaitTermination()
+    finally:
+        query.stop()
+
+finally:
+    spark.stop()

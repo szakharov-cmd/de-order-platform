@@ -1,0 +1,13 @@
+orders_analytics:
+  target: dev
+  outputs:
+    dev:
+      type: clickhouse
+      driver: http
+      host: clickhouse
+      port: 8123
+      schema: silver
+      user: "{{ env_var('CLICKHOUSE_USER') }}"
+      password: "{{ env_var('CLICKHOUSE_PASSWORD') }}"
+      secure: false
+      threads: 2

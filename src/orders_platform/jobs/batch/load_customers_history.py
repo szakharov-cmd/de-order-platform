@@ -2,12 +2,12 @@ from pyspark.sql import SparkSession
 import clickhouse_connect
 import os
 
-from orders_platform.transformations.customers import build_customers_state
-from orders_platform.sinks.clickhouse import insert_customers_state
+from orders_platform.transformations.customers import parse_customers_cdc
+from orders_platform.sinks.clickhouse import insert_customers_history
 
 spark = (
     SparkSession.builder
-    .appName('load-customers')
+    .appName('load-customers-history')
     .config('spark.sql.session.timeZone', 'UTC')
     .getOrCreate()
 )
@@ -15,7 +15,7 @@ spark = (
 try:
     spark.sparkContext.setLogLevel('WARN')
     customers_df = spark.read.parquet('s3a://bronze/cdc/all-tables-v1/')
-    customers_df = build_customers_state(cdc_df=customers_df)
+    customers_df = parse_customers_cdc(cdc_df=customers_df)
 
     ch_host = os.environ['CLICKHOUSE_HOST']
     ch_port = int(os.environ['CLICKHOUSE_PORT'])
@@ -32,7 +32,8 @@ try:
     )
 
     try:
-        insert_customers_state(client=ch_client, state_df=customers_df)
+        inserted_rows = insert_customers_history(client=ch_client, history_df=customers_df)
+        print(f"Sent {inserted_rows} rows to ClickHouse", flush=True)
     finally:
         ch_client.close()
 
