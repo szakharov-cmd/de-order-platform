@@ -21,7 +21,7 @@ select
     payment_method,
     created_at,
     updated_at,
-    succedeed_at,
+    succeeded_at,
     source_changed_at,
     ingested_at,
     partition as source_partition,
