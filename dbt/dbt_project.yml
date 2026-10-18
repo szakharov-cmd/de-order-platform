@@ -6,4 +6,6 @@ models:
   orders_analytics:
     silver:
       +materialized: view
+    intermediate:
+      +materialized: ephemeral
 model-paths: ['models']
