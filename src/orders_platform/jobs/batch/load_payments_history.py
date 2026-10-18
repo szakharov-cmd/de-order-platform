@@ -7,7 +7,7 @@ from orders_platform.sinks.clickhouse import insert_payments_history
 
 spark = (
     SparkSession.builder
-    .appName('load-order-items-history')
+    .appName('load-payments-history')
     .config('spark.sql.session.timeZone', 'UTC')
     .getOrCreate()
 )

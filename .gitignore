@@ -4,3 +4,5 @@ dbt/logs/
 dbt/dbt_packages/
 .idea/
 dbt/.user.yml
+__pycache__/
+*.py[cod]

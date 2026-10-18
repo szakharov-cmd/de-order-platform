@@ -218,7 +218,7 @@ services:
         hard: 262144
 
 
-  spark-customers:
+  spark-staging:
     image: de-orders-spark:dev
 
     environment:
@@ -232,6 +232,7 @@ services:
       CLICKHOUSE_DATABASE: "silver_state"
 
     volumes:
+      # Keep the existing volume to preserve streaming progress.
       - spark_customers_checkpoint:/checkpoints
 
     command:

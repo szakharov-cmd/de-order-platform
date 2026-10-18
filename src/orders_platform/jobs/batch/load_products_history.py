@@ -7,7 +7,7 @@ from orders_platform.sinks.clickhouse import insert_products_history
 
 spark = (
     SparkSession.builder
-    .appName('load-customers-history')
+    .appName('load-product-history')
     .config('spark.sql.session.timeZone', 'UTC')
     .getOrCreate()
 )
