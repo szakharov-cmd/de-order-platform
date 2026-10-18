@@ -8,4 +8,7 @@ models:
       +materialized: view
     intermediate:
       +materialized: ephemeral
+    gold:
+      +schema: gold
+      +materialized: table
 model-paths: ['models']

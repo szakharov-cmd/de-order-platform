@@ -1,0 +1,114 @@
+version: 2
+
+models:
+  - name: orders_obt
+    description: >-
+      Enriched order snapshot with one row per order.
+      Customer attributes reflect current values, not values at purchase time.
+      Data refreshes on dbt builds; monetary measures use the order currency.
+    columns:
+      - name: order_id
+        description: "Unique order identifier."
+        data_tests:
+          - unique
+          - not_null
+      - name: customer_id
+        description: "Customer identifier."
+        data_tests:
+          - not_null
+      - name: order_status
+        description: "Current order status."
+        data_tests:
+          - not_null
+      - name: currency
+        description: "Currency of all monetary measures for the order."
+        data_tests:
+          - not_null
+      - name: delivery_region
+        description: "Order delivery region."
+      - name: created_at
+        description: "Order creation timestamp."
+      - name: updated_at
+        description: "Latest order update timestamp in the source system."
+      - name: customer_email
+        description: "Current customer email; NULL when the customer is absent from Silver."
+      - name: customer_region
+        description: "Current customer region, not the region at order creation."
+      - name: customer_segment
+        description: "Current customer segment, not the segment at order creation."
+      - name: line_count
+        description: "Number of current order lines."
+        data_tests:
+          - not_null
+      - name: item_quantity
+        description: "Total number of ordered units."
+        data_tests:
+          - not_null
+      - name: items_gross_amount
+        description: "Item value before discounts, calculated using purchase prices."
+        data_tests:
+          - not_null
+      - name: discount_amount
+        description: "Total discount across order lines."
+        data_tests:
+          - not_null
+      - name: items_net_amount
+        description: "Item value after discounts, excluding shipping."
+        data_tests:
+          - not_null
+      - name: shipping_amount
+        description: "Shipping charge."
+        data_tests:
+          - not_null
+      - name: order_total_amount
+        description: "Item value after discounts plus shipping."
+        data_tests:
+          - not_null
+      - name: payment_attempt_count
+        description: "Number of current payment attempts across all statuses."
+        data_tests:
+          - not_null
+      - name: successful_payment_count
+        description: "Number of successful payment attempts."
+        data_tests:
+          - not_null
+      - name: failed_payment_count
+        description: "Number of failed payment attempts."
+        data_tests:
+          - not_null
+      - name: paid_amount
+        description: "Total successful payments before refunds."
+        data_tests:
+          - not_null
+      - name: refund_attempt_count
+        description: "Number of current refund attempts across all statuses."
+        data_tests:
+          - not_null
+      - name: successful_refund_count
+        description: "Number of successful refund attempts."
+        data_tests:
+          - not_null
+      - name: failed_refund_count
+        description: "Number of failed refund attempts."
+        data_tests:
+          - not_null
+      - name: refunded_amount
+        description: "Total successful refunds only."
+        data_tests:
+          - not_null
+      - name: net_collected_amount
+        description: "Successful payments minus successful refunds."
+        data_tests:
+          - not_null
+      - name: is_fully_paid
+        description: "1 when at least one successful payment exists and paid amount covers the order total before refunds; otherwise 0."
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [0, 1]
+                quote: false
+      - name: built_at
+        description: "OBT snapshot build timestamp in UTC."
+        data_tests:
+          - not_null

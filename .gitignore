@@ -2,3 +2,5 @@
 dbt/target/
 dbt/logs/
 dbt/dbt_packages/
+.idea/
+dbt/.user.yml
