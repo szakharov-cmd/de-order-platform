@@ -18,12 +18,14 @@ from orders_platform.transformations.orders import parse_orders_cdc
 from orders_platform.transformations.order_items import parse_order_items_cdc
 from orders_platform.transformations.payments import parse_payments_cdc
 from orders_platform.transformations.refunds import parse_refunds_cdc
+from orders_platform.transformations.products import parse_products_cdc
 from orders_platform.sinks.clickhouse import (
     insert_customers_history,
     insert_orders_history,
     insert_order_items_history,
     insert_payments_history,
-    insert_refunds_history
+    insert_refunds_history,
+    insert_products_history
 )
 
 
@@ -75,6 +77,7 @@ try:
             order_items_df = parse_order_items_cdc(batch)
             payments_df = parse_payments_cdc(batch)
             refunds_df = parse_refunds_cdc(batch)
+            products_df = parse_products_cdc(batch)
 
             inserted_rows = insert_customers_history(ch_client, customers_df)
             print(
@@ -99,6 +102,11 @@ try:
             inserted_rows = insert_refunds_history(ch_client, refunds_df)
             print(
                 f"Refunds microbatch {batch_id}: sent {inserted_rows} rows",
+                flush=True,
+            )
+            inserted_rows = insert_products_history(ch_client, products_df)
+            print(
+                f"Products microbatch {batch_id}: sent {inserted_rows} rows",
                 flush=True,
             )
         finally:

@@ -1,0 +1,51 @@
+version: 2
+
+models:
+  - name: products
+    description: "Actual products data"
+    columns:
+      - name: product_id
+        description: "Product ID"
+        data_tests:
+          - unique
+          - not_null
+      - name: name
+        description: "Product name"
+        data_tests:
+          - not_null
+      - name: category
+        description: "Product category"
+        data_tests:
+          - not_null
+      - name: brand
+        description: "Product brand"
+        data_tests:
+          - not_null
+      - name: current_price
+        description: "Product price"
+        data_tests:
+          - not_null
+      - name: created_at
+        description: "Refund created at service"
+        data_tests:
+          - not_null
+      - name: updated_at
+        description: "Refund last updated"
+        data_tests:
+          - not_null
+      - name: source_changed_at
+        description: "Debezium update time"
+        data_tests:
+          - not_null
+      - name: ingested_at
+        description: "S3 ingest time"
+        data_tests:
+          - not_null
+      - name: source_partition
+        description: "Kafka partition"
+        data_tests:
+          - not_null
+      - name: source_offset
+        description: "Kafka offset"
+        data_tests:
+          - not_null

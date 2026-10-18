@@ -13,3 +13,5 @@ sources:
         description: "Payments history data"
       - name: refunds_cdc
         description: "Refunds history data"
+      - name: products_cdc
+        description: "Products history data"
